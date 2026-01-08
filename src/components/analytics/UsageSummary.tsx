@@ -84,14 +84,6 @@ export const UsageSummaryCard = ({ data, isLoading, hasError, title = '使用概
           label="平均耗时" 
           value={formatDuration(data.avg_duration_ms)}
         />
-        <StatCard 
-          label="模型数" 
-          value={data.unique_models}
-        />
-        <StatCard 
-          label="提供商数" 
-          value={data.unique_providers}
-        />
       </div>
     </div>
   );

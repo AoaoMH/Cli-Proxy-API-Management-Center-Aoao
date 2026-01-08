@@ -38,7 +38,7 @@ export const ActivityHeatmap = ({ data, title = '活跃天数', isLoading, hasEr
   const [visibleWeeksCount, setVisibleWeeksCount] = useState(0);
 
   // Fixed cell size for consistent appearance
-  const CELL_SIZE = 11;
+  const CELL_SIZE = 15;
   const CELL_GAP = 3;
   const WEEKDAY_LABEL_WIDTH = 20; // 1.25rem
 
