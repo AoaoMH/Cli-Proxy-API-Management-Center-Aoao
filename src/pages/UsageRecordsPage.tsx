@@ -170,7 +170,7 @@ export function UsageRecordsPage() {
     setHeatmapLoading(true);
     setHeatmapError(false);
     try {
-      const data = await usageRecordsApi.getHeatmap(90);
+      const data = await usageRecordsApi.getHeatmap(500);
       setHeatmapData(data);
     } catch (err) {
       console.error('Failed to load heatmap:', err);
@@ -447,6 +447,7 @@ export function UsageRecordsPage() {
           <div className="analytics-col analytics-col-summary">
             <UsageSummaryCard
               data={usageSummary}
+              title={t('usage_records.usage_summary', { defaultValue: '使用概览' })}
               isLoading={summaryLoading}
               hasError={summaryError}
             />
@@ -459,9 +460,7 @@ export function UsageRecordsPage() {
               hasError={heatmapError}
             />
           </div>
-        </div>
-        <div className="analytics-row analytics-row-full">
-          <div className="analytics-col analytics-col-full">
+          <div className="analytics-col analytics-col-timeline">
             <RequestTimeline
               data={timelineData}
               title={t('usage_records.request_timeline', { defaultValue: '请求时间线' })}

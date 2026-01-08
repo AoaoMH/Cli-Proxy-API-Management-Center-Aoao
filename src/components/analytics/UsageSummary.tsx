@@ -29,16 +29,17 @@ interface StatCardProps {
 
 const StatCard = ({ label, value, subValue, variant = 'default' }: StatCardProps) => (
   <div className={`stat-card ${variant}`}>
-    <div className="stat-value">{value}</div>
     <div className="stat-label">{label}</div>
+    <div className="stat-value">{value}</div>
     {subValue && <div className="stat-sub">{subValue}</div>}
   </div>
 );
 
-export const UsageSummaryCard = ({ data, isLoading, hasError }: UsageSummaryProps) => {
+export const UsageSummaryCard = ({ data, isLoading, hasError, title = '使用概览' }: UsageSummaryProps & { title?: string }) => {
   if (isLoading) {
     return (
       <div className="usage-summary-card">
+        <h3 className="summary-title">{title}</h3>
         <div className="summary-loading">
           <div className="spinner" />
           <span>加载中...</span>
@@ -50,6 +51,7 @@ export const UsageSummaryCard = ({ data, isLoading, hasError }: UsageSummaryProp
   if (hasError || !data) {
     return (
       <div className="usage-summary-card">
+        <h3 className="summary-title">{title}</h3>
         <div className="summary-error">
           {hasError ? '加载失败' : '暂无数据'}
         </div>
@@ -61,6 +63,7 @@ export const UsageSummaryCard = ({ data, isLoading, hasError }: UsageSummaryProp
 
   return (
     <div className="usage-summary-card">
+      <h3 className="summary-title">{title}</h3>
       <div className="summary-grid">
         <StatCard 
           label="总请求数" 

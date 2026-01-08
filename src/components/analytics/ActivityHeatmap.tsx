@@ -12,8 +12,7 @@ interface ActivityHeatmapProps {
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
-const MIN_CELL_SIZE = 6;
-const DEFAULT_CELL_SIZE = 10;
+
 
 // Get intensity level (0-4) based on request count
 const getIntensityLevel = (requests: number, maxRequests: number): number => {
@@ -36,8 +35,12 @@ const formatNumber = (num: number): string => {
 
 export const ActivityHeatmap = ({ data, title = '活跃天数', isLoading, hasError }: ActivityHeatmapProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const [cellSize, setCellSize] = useState(DEFAULT_CELL_SIZE);
-  const [cellGap, setCellGap] = useState(4);
+  const [visibleWeeksCount, setVisibleWeeksCount] = useState(0);
+
+  // Fixed cell size for consistent appearance
+  const CELL_SIZE = 11;
+  const CELL_GAP = 3;
+  const WEEKDAY_LABEL_WIDTH = 20; // 1.25rem
 
   const { weeks, monthLabels } = useMemo(() => {
     if (!data?.days?.length) {
@@ -95,39 +98,35 @@ export const ActivityHeatmap = ({ data, title = '活跃天数', isLoading, hasEr
     return { weeks, monthLabels };
   }, [data]);
 
+  // Calculate how many weeks can fit in the container
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
 
-    const updateSizing = () => {
+    const updateVisibleWeeks = () => {
       const width = el.clientWidth;
-      const isSmall = typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches;
-      const gap = isSmall ? 2 : 4;
-      setCellGap(gap);
-
-      const colCount = weeks.length;
-      if (!colCount || width <= 0) {
-        setCellSize(DEFAULT_CELL_SIZE);
+      if (width <= 0 || weeks.length === 0) {
+        setVisibleWeeksCount(weeks.length);
         return;
       }
 
-      // Match Aether: fit cells to available width, minimum size.
-      const reserved = 24; // weekday labels + padding
-      const available = Math.max(width - reserved, 0);
-      const totalGap = Math.max(colCount - 1, 0) * gap;
-      const raw = (available - totalGap) / colCount;
-      setCellSize(Math.max(MIN_CELL_SIZE, Math.floor(raw)));
+      // Calculate available width for the grid (subtract weekday labels)
+      const availableWidth = width - WEEKDAY_LABEL_WIDTH;
+      // Calculate how many weeks can fit with fixed cell size
+      const weeksCanFit = Math.floor((availableWidth + CELL_GAP) / (CELL_SIZE + CELL_GAP));
+      // Limit to actual weeks count
+      setVisibleWeeksCount(Math.min(Math.max(weeksCanFit, 1), weeks.length));
     };
 
-    updateSizing();
+    updateVisibleWeeks();
 
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(() => updateSizing());
+      ro = new ResizeObserver(() => updateVisibleWeeks());
       ro.observe(el);
     }
 
-    const onResize = () => updateSizing();
+    const onResize = () => updateVisibleWeeks();
     window.addEventListener('resize', onResize);
 
     return () => {
@@ -135,6 +134,27 @@ export const ActivityHeatmap = ({ data, title = '活跃天数', isLoading, hasEr
       window.removeEventListener('resize', onResize);
     };
   }, [weeks.length]);
+
+  // Get visible weeks (from the end, showing most recent data)
+  const visibleWeeks = useMemo(() => {
+    if (visibleWeeksCount >= weeks.length || visibleWeeksCount === 0) return weeks;
+    // Slice from the end to show most recent weeks
+    return weeks.slice(weeks.length - visibleWeeksCount);
+  }, [weeks, visibleWeeksCount]);
+
+  // Calculate visible month labels based on visible weeks
+  const visibleMonthLabels = useMemo(() => {
+    if (visibleWeeksCount >= weeks.length || visibleWeeksCount === 0) return monthLabels;
+    
+    const startVisibleIndex = weeks.length - visibleWeeksCount;
+    return monthLabels
+      .filter(label => label.colStart >= startVisibleIndex)
+      .map(label => ({
+        ...label,
+        colStart: label.colStart - startVisibleIndex,
+      }));
+  }, [monthLabels, weeks.length, visibleWeeksCount]);
+
 
   const hasData = data && data.days && data.days.length > 0;
   const activeDays = data?.days?.filter(d => d.requests > 0).length || 0;
@@ -201,8 +221,8 @@ export const ActivityHeatmap = ({ data, title = '活跃天数', isLoading, hasEr
           </div>
 
           <div className="heatmap-container" ref={wrapperRef}>
-            <div className="month-labels" style={{ gridTemplateColumns: `repeat(${weeks.length}, ${cellSize}px)` }}>
-              {monthLabels.map((label, i) => (
+            <div className="month-labels" style={{ gridTemplateColumns: `repeat(${visibleWeeks.length}, ${CELL_SIZE}px)` }}>
+              {visibleMonthLabels.map((label, i) => (
                 <span 
                   key={i} 
                   className="month-label"
@@ -213,23 +233,23 @@ export const ActivityHeatmap = ({ data, title = '活跃天数', isLoading, hasEr
               ))}
             </div>
 
-            <div className="heatmap-grid-wrapper" style={{ columnGap: `${cellGap}px` }}>
-              <div className="weekday-labels" style={{ rowGap: `${cellGap}px` }}>
+            <div className="heatmap-grid-wrapper" style={{ columnGap: `${CELL_GAP}px` }}>
+              <div className="weekday-labels" style={{ rowGap: `${CELL_GAP}px` }}>
                 {WEEKDAYS.map((day, i) => (
-                  <span key={i} className="weekday-label" style={{ height: `${cellSize}px` }}>
+                  <span key={i} className="weekday-label" style={{ height: `${CELL_SIZE}px` }}>
                     {i % 2 === 1 ? day : ''}
                   </span>
                 ))}
               </div>
 
-              <div className="heatmap-grid" style={{ gridTemplateColumns: `repeat(${weeks.length}, ${cellSize}px)`, gap: `${cellGap}px` }}>
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="heatmap-week" style={{ rowGap: `${cellGap}px` }}>
+              <div className="heatmap-grid" style={{ gridTemplateColumns: `repeat(${visibleWeeks.length}, ${CELL_SIZE}px)`, gap: `${CELL_GAP}px` }}>
+                {visibleWeeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className="heatmap-week" style={{ rowGap: `${CELL_GAP}px` }}>
                     {week.map((day, dayIndex) => (
                       <div
                         key={dayIndex}
                         className={`heatmap-cell ${day.requests < 0 ? 'empty' : ''}`}
-                        style={{ width: `${cellSize}px`, height: `${cellSize}px`, borderRadius: Math.max(2, Math.floor(cellSize / 4)) }}
+                        style={{ width: `${CELL_SIZE}px`, height: `${CELL_SIZE}px`, borderRadius: 3 }}
                         data-level={day.requests >= 0 ? getIntensityLevel(day.requests, data.max_requests) : 0}
                         title={day.date ? `${day.date}: ${day.requests} 请求, ${formatNumber(day.total_tokens)} tokens` : ''}
                       />

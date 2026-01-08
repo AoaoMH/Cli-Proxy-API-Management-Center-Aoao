@@ -20,6 +20,25 @@
     display: flex;
     gap: $spacing-md;
     flex-wrap: wrap;
+    align-items: stretch; // Ensure equal height
+  }
+
+  // Common flex properties for all three columns to share space equally
+  .analytics-col-summary,
+  .analytics-col-heatmap,
+  .analytics-col-timeline {
+    flex: 1 1 30%;
+    min-width: 320px; // Ensure readable content width
+  }
+
+  // Remove specific constraints that might conflict
+  .analytics-col-heatmap {
+    max-width: none;
+  }
+  
+  .analytics-col-full {
+    flex: 1 1 100%;
+    min-width: 100%;
   }
 
   .analytics-row.analytics-row-2col {
@@ -34,30 +53,6 @@
     .analytics-col {
       min-width: 0;
     }
-  }
-
-  .analytics-row.analytics-row-full {
-    display: block;
-  }
-
-  .analytics-col {
-    flex: 1;
-    min-width: 300px;
-  }
-
-  .analytics-col-summary {
-    flex: 1;
-    min-width: 300px;
-  }
-
-  .analytics-col-heatmap {
-    flex: 2;
-    min-width: 400px;
-  }
-
-  .analytics-col-full {
-    flex: 1 1 100%;
-    min-width: 100%;
   }
 
   // Filter controls in header

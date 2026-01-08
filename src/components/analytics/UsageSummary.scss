@@ -4,10 +4,21 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: $radius-lg;
-  padding: $spacing-md;
+  padding: $spacing-lg;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .summary-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: $spacing-md;
+  }
 
   .summary-loading,
   .summary-error {
+    flex: 1;
     min-height: 120px;
     display: flex;
     align-items: center;
@@ -28,20 +39,19 @@
 
   .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: $spacing-md;
+    flex: 1;
   }
 
   .stat-card {
-    background: var(--bg-tertiary);
+    padding: $spacing-sm;
+    text-align: left;
+    transition: transform $transition-fast;
     border-radius: $radius-md;
-    padding: $spacing-sm + 2px;
-    text-align: center;
-    transition: transform $transition-fast, box-shadow $transition-fast;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: $shadow-md;
+      background: var(--bg-tertiary);
     }
 
     .stat-value {
@@ -49,31 +59,27 @@
       font-weight: 700;
       color: var(--text-primary);
       line-height: 1.2;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     .stat-label {
       font-size: 0.75rem;
+      font-weight: 500;
       color: var(--text-secondary);
-      margin-top: $spacing-xs;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
     .stat-sub {
-      font-size: 0.6875rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      margin-top: $spacing-xs;
+      margin-top: 4px;
     }
 
-    &.success .stat-value {
-      color: $success-color;
-    }
-
-    &.warning .stat-value {
-      color: $warning-color;
-    }
-
-    &.error .stat-value {
-      color: $error-color;
-    }
+    &.success .stat-value { color: $success-color; }
+    &.warning .stat-value { color: $warning-color; }
+    &.error .stat-value { color: $error-color; }
   }
 }
 

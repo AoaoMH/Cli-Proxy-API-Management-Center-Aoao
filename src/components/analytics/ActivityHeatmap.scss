@@ -6,6 +6,9 @@
   border-radius: $radius-lg;
   padding: $spacing-md;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .heatmap-header {
     display: flex;
@@ -60,7 +63,7 @@
   }
 
   .heatmap-container {
-    overflow-x: auto;
+    overflow: hidden;
     padding-bottom: $spacing-sm;
   }
 
